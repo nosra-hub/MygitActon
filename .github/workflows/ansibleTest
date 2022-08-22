@@ -1,5 +1,4 @@
 
-name: Deploy Eleventy via SSH
 
 on:
   push:
