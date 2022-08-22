@@ -1,28 +1,31 @@
- name: Run playbook
-  uses: dawidd6/action-ansible-playbook@v2
-  with:
-    # Required, playbook filepath
-    playbook: deploy.yml
-    # Optional, directory where playbooks live
-    directory: ./
-    # Optional, SSH private key
-    key: ${{secrets.SSH_PRIVATE_KEY}}
-    # Optional, literal inventory file contents
-    inventory: |
-      [all]
-      example.com
 
-      [group1]
-      example.com
-    # Optional, SSH known hosts file content
-    known_hosts: .known_hosts
-    # Optional, encrypted vault password
-    vault_password: ${{secrets.VAULT_PASSWORD}}
-    # Optional, galaxy requirements filepath
-    requirements: galaxy-requirements.yml
-    # Optional, additional flags to pass to ansible-playbook
-    options: |
-      --inventory .hosts
-      --limit group1
-      --extra-vars hello=there
-      --verbose
+name: Deploy Eleventy via SSH
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, 
+      # so your workflow can access it
+      - uses: actions/checkout@master
+
+      
+        with:
+          remote_docker_host: nosra@192.168.1.27
+          ssh_private_key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.DOCKER_SSH_PUBLIC_KEY }}
+          deployment_mode: docker-compose
+          args: up -d
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
+          rm: true
+          source: "docker-compse.yml"
+          target: "${{ secrets.REMOTE_DIR }}"
